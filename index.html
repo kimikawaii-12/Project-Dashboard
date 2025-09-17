@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Project Dashboard</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h1>📊 KIMI KAWAII Project Control Panel</h1>
+
+  <!-- Display Projects -->
+  <div id="projects"></div>
+
+  <!-- Add New Project -->
+  <h2>Add Project</h2>
+  <input type="text" id="projectName" placeholder="Project Name">
+  <input type="date" id="deadline">
+  <button onclick="addProject()">Add Project</button>
+
+  <script>
+    // 1. Connect to Supabase
+    const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";  // replace with yours
+    const SUPABASE_KEY = "YOUR_ANON_KEY";  // replace with yours
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 2. Load Projects
+    async function loadProjects() {
+      let { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .order("id", { ascending: false });
+
+      if (error) console.error(error);
+      const container = document.getElementById("projects");
+      container.innerHTML = "";
+      data.forEach(p => {
+        container.innerHTML += `<p><b>${p.name}</b> (Deadline: ${p.deadline}) – Progress: ${p.progress}%</p>`;
+      });
+    }
+
+    // 3. Add Project
+    async function addProject() {
+      const name = document.getElementById("projectName").value;
+      const deadline = document.getElementById("deadline").value;
+      const { error } = await supabase
+        .from("projects")
+        .insert([{ name: name, deadline: deadline, progress: 0 }]);
+      if (error) console.error(error);
+      loadProjects();
+    }
+
+    // Load when page opens
+    loadProjects();
+  </script>
+</body>
+</html>
